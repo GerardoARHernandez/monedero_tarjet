@@ -1,18 +1,18 @@
-//src/components/AdminHeader.jsx
-
+// src/components/AdminHeader.jsx 
 import { useNavigate } from "react-router-dom";
+import ThemeToggle from "./ThemeToggle";
 
 const AdminHeader = () => {
   const navigate = useNavigate();
 
   return (
-    <header className="bg-gray-900 text-white shadow-lg border-b border-gray-700">
+    <header className="bg-gray-900 dark:bg-gray-950 text-white shadow-lg border-b border-gray-700 dark:border-gray-800 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-amber-400 rounded-md flex items-center justify-center">
-          </div>
             <span className="text-gray-900 font-bold text-sm">M</span>
+          </div>
           <div>
             <span className="text-xl font-bold tracking-tight">Monedero</span>
             <span className="ml-2 text-xs bg-amber-400 text-gray-900 font-semibold px-2 py-0.5 rounded-full">
@@ -28,8 +28,9 @@ const AdminHeader = () => {
           <a href="#" className="hover:text-white transition-colors">Canjear</a>
         </nav>
 
-        {/* Admin user */}
+        {/* Admin user y ThemeToggle */}
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <div className="text-right hidden sm:block">
             <p className="text-sm font-semibold">Admin</p>
             <p className="text-xs text-gray-400">Superusuario</p>

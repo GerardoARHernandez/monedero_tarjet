@@ -1,6 +1,7 @@
-//src/views/ClientHome.jsx
+// src/views/ClientHome.jsx 
 import ClientHeader from "../components/ClientHeader";
 import ClientFooter from "../components/ClientFooter";
+import { useTheme } from "../context/ThemeContext"; 
 
 const transactions = [
   { id: 1, desc: "Recarga de saldo", amount: "+$500.00", date: "10 mar 2026", type: "credit" },
@@ -9,12 +10,14 @@ const transactions = [
 ];
 
 const ClientHome = () => {
+  const { isDark } = useTheme(); // Opcional
+
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       <ClientHeader />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-8 space-y-6">
-        {/* Balance card - 50/50 desktop, imagen arriba en mobile */}
+        {/* Balance card */}
         <div className="flex flex-col md:flex-row gap-4 md:gap-6">
           {/* Imagen */}
           <div className="md:w-1/2 order-1 md:order-1">
@@ -32,7 +35,7 @@ const ClientHome = () => {
             </div>
           </div>
 
-          {/* Saldo */}
+          {/* Saldo  */}
           <div className="md:w-1/2 order-2 md:order-2">
             <div className="bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg h-full flex flex-col justify-between">
               <div>
@@ -62,41 +65,45 @@ const ClientHome = () => {
           </div>
         </div>
 
-        {/* Quick stats */}
+        {/* Estadísticas  */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Ingresos del mes", value: "$1,200.00", color: "text-green-600" },
-            { label: "Gastos del mes", value: "$780.00", color: "text-red-500" },
-            { label: "Movimientos", value: "3", color: "text-indigo-600" },
-            { label: "Recargas", value: "2", color: "text-indigo-600" },
+            { label: "Ingresos del mes", value: "$1,200.00", color: "text-green-600 dark:text-green-400" },
+            { label: "Gastos del mes", value: "$780.00", color: "text-red-500 dark:text-red-400" },
+            { label: "Movimientos", value: "3", color: "text-indigo-600 dark:text-indigo-400" },
+            { label: "Recargas", value: "2", color: "text-indigo-600 dark:text-indigo-400" },
           ].map((stat) => (
-            <div key={stat.label} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-              <p className="text-xs text-gray-500">{stat.label}</p>
+            <div key={stat.label} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-400 dark:border-gray-700">
+              <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
               <p className={`text-xl font-bold mt-1 ${stat.color}`}>{stat.value}</p>
             </div>
           ))}
         </div>
 
-        {/* Recent transactions */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="font-semibold text-gray-800">Movimientos recientes</h2>
-            <a href="#" className="text-sm text-indigo-600 hover:underline">Ver todos</a>
+        {/* Transacciones Recientes  */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-400 dark:border-gray-700">
+          <div className="px-6 py-4 border-b border-gray-400 dark:border-gray-700 flex items-center justify-between">
+            <h2 className="font-semibold text-gray-800 dark:text-white">Movimientos recientes</h2>
+            <a href="#" className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Ver todos</a>
           </div>
-          <ul className="divide-y divide-gray-50">
+          <ul className="divide-y divide-gray-400 dark:divide-gray-700">
             {transactions.map((tx) => (
-              <li key={tx.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition">
+              <li key={tx.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                 <div className="flex items-center gap-3">
                   <div className={`w-9 h-9 rounded-full flex items-center justify-center text-lg
-                    ${tx.type === "credit" ? "bg-green-100" : "bg-red-100"}`}>
+                    ${tx.type === "credit" 
+                      ? "bg-green-400 dark:bg-green-900/80" 
+                      : "bg-red-400 dark:bg-red-900/80"}`}>
                     {tx.type === "credit" ? "↓" : "↑"}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-800">{tx.desc}</p>
-                    <p className="text-xs text-gray-400">{tx.date}</p>
+                    <p className="text-sm font-medium text-gray-800 dark:text-white">{tx.desc}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">{tx.date}</p>
                   </div>
                 </div>
-                <span className={`text-sm font-bold ${tx.type === "credit" ? "text-green-600" : "text-red-500"}`}>
+                <span className={`text-sm font-bold ${tx.type === "credit" 
+                  ? "text-green-600 dark:text-green-400" 
+                  : "text-red-500 dark:text-red-400"}`}>
                   {tx.amount}
                 </span>
               </li>
