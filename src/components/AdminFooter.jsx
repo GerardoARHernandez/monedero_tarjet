@@ -1,3 +1,5 @@
+//src/components/AdminFooter.jsx
+
 const AdminFooter = () => {
   return (
     <footer className="bg-gray-900 text-gray-500 text-sm border-t border-gray-700">

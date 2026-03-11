@@ -1,3 +1,5 @@
+//src/components/AdminHeader.jsx
+
 import { useNavigate } from "react-router-dom";
 
 const AdminHeader = () => {

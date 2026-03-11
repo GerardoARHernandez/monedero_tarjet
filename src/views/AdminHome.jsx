@@ -1,3 +1,5 @@
+//src/views/AdminHome.jsx
+
 import AdminHeader from "../components/AdminHeader";
 import AdminFooter from "../components/AdminFooter";
 

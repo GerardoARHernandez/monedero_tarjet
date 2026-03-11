@@ -1,3 +1,4 @@
+//src/views/ClientHome.jsx
 import ClientHeader from "../components/ClientHeader";
 import ClientFooter from "../components/ClientFooter";
 
@@ -13,13 +14,51 @@ const ClientHome = () => {
       <ClientHeader />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-8 space-y-6">
-        {/* Balance card */}
-        <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-2xl p-6 text-white shadow-lg">
-          <p className="text-sm text-indigo-200 font-medium">Saldo disponible</p>
-          <p className="text-4xl font-bold mt-1">$820.00</p>
-          <div>
-            <p className="text-sm text-indigo-200 mt-2">Gerardo Ruelas Hernández</p>
-            <p className="text-xs text-indigo-200">55 3213 4821</p>
+        {/* Balance card - 50/50 desktop, imagen arriba en mobile */}
+        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+          {/* Imagen */}
+          <div className="md:w-1/2 order-1 md:order-1">
+            <div className="relative rounded-2xl overflow-hidden shadow-lg h-48 md:h-full">
+              <img 
+                src="/header-client.jpeg" 
+                alt="Wallet illustration" 
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+              <div className="absolute bottom-4 left-4 text-white">
+                <p className="text-sm font-medium opacity-90">Bienvenido</p>
+                <p className="text-lg font-bold">Tu monedero digital</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Saldo */}
+          <div className="md:w-1/2 order-2 md:order-2">
+            <div className="bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg h-full flex flex-col justify-between">
+              <div>
+                <p className="text-sm text-indigo-200 font-medium flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Saldo disponible
+                </p>
+                <p className="text-4xl font-bold mt-2">$820.00</p>
+              </div>
+              
+              <div className="mt-4 pt-4 border-t border-indigo-400/30">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-indigo-200">Gerardo Ruelas Hernández</p>
+                    <p className="text-xs text-indigo-200 flex items-center gap-1 mt-1">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      55 3213 4821
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

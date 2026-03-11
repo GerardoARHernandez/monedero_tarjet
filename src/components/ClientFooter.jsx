@@ -1,3 +1,5 @@
+//src/components/ClientFooter.jsx
+
 const ClientFooter = () => {
   return (
     <footer className="bg-indigo-900 text-indigo-300 text-sm">

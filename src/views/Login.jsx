@@ -1,3 +1,5 @@
+//src/views/Login.jsx
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -17,15 +19,15 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-indigo-100 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         {/* Card */}
+        <div className="p-2 mb-6">
+          <img src="/header-client.jpeg" alt="Logo Monedero" 
+          srcset="" className="w-full h-auto rounded-t-2xl" />
+        </div>
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          {/* Logo */}
-          <div className="flex flex-col items-center mb-8">
-            <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center mb-3 shadow-md">
-              <span className="text-white font-bold text-2xl">M</span>
-            </div>
+          <div className="flex flex-col items-center mb-8">            
             <h1 className="text-2xl font-bold text-gray-800">Monedero</h1>
             <p className="text-sm text-gray-500 mt-1">Inicia sesión en tu monedero</p>
           </div>
