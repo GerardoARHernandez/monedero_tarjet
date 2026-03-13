@@ -1,5 +1,5 @@
 // src/components/AdminHeader.jsx 
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ThemeToggle from "./ThemeToggle";
 
 const AdminHeader = () => {
@@ -23,9 +23,10 @@ const AdminHeader = () => {
 
         {/* Nav */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-300">
-          <a href="#" className="hover:text-white transition-colors">Dashboard</a>
-          <a href="#" className="hover:text-white transition-colors">Abonar</a>
-          <a href="#" className="hover:text-white transition-colors">Canjear</a>
+          <Link to="/admin" className="hover:text-white transition-colors">Dashboard</Link>
+          <Link to="#" className="hover:text-white transition-colors">Abonar</Link>
+          <Link to="#" className="hover:text-white transition-colors">Canjear</Link>
+          <Link to="/admin/registrar" className="hover:text-white transition-colors">Registrar</Link>
         </nav>
 
         {/* Admin user y ThemeToggle */}

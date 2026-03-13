@@ -1,7 +1,7 @@
 // src/views/AdminHome.jsx 
-import AdminHeader from "../components/AdminHeader";
-import AdminFooter from "../components/AdminFooter";
-import { useTheme } from "../context/ThemeContext";
+import AdminHeader from "../../components/AdminHeader";
+import AdminFooter from "../../components/AdminFooter";
+import { useTheme } from "../../context/ThemeContext";
 
 const users = [
   { id: 1, name: "Juan Díaz", email: "juan@mail.com", balance: "$4,820.00" },
