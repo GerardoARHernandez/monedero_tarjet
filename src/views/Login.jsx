@@ -24,7 +24,7 @@ const Login = () => {
       <div className="w-full max-w-md">
         {/* Card */}
         <div className="p-2 mb-6">
-          <img src="/header-client.jpeg" alt="Logo Monedero" className="w-full h-auto rounded-t-2xl" />
+          <img src="/1.jpeg" alt="Logo Monedero" className="w-full h-auto rounded-t-2xl" />
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
           <div className="flex flex-col items-center mb-8">            

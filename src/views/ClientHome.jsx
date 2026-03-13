@@ -23,7 +23,7 @@ const ClientHome = () => {
           <div className="md:w-1/2 order-1 md:order-1">
             <div className="relative rounded-2xl overflow-hidden shadow-lg h-48 md:h-full">
               <img 
-                src="/header-client.jpeg" 
+                src="/1.jpeg" 
                 alt="Wallet illustration" 
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
               />
