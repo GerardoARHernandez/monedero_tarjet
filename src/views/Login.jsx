@@ -1,6 +1,6 @@
 // src/views/Login.jsx
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 
@@ -78,9 +78,6 @@ const Login = () => {
                   className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 />
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Formato: 55-1234-5678
-              </p>
             </div>
 
             <div>
@@ -125,9 +122,9 @@ const Login = () => {
           {/* Opción de registro */}
           <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
             ¿No tienes cuenta?{" "}
-            <a href="#" className="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
+            <Link to="/registro" className="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
               Regístrate aquí
-            </a>
+            </Link>
           </p>
         </div>
       </div>
