@@ -32,10 +32,10 @@ const Login = () => {
     const numbers = value.replace(/\D/g, "");
     
     // Aplicar formato dependiendo de la longitud
-    if (numbers.length <= 2) {
+    if (numbers.length <= 3) {
       return numbers;
     } else if (numbers.length <= 6) {
-      return `${numbers.slice(0, 2)}-${numbers.slice(3)}`;
+      return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
     } else {
       return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)}-${numbers.slice(6, 10)}`;
     }
@@ -78,6 +78,9 @@ const Login = () => {
                   className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 />
               </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Formato: 55-1234-5678
+              </p>
             </div>
 
             <div>
