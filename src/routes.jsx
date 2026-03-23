@@ -3,7 +3,8 @@ import Login from "./views/Login";
 import ClientHome from "./views/ClientHome";
 import AdminHome from "./views/admin/AdminHome";
 import RegisterFromAdmin from "./views/admin/RegisterFromAdmin";
-import RegisterClient from "./views/RegisterClient";
+import Abonar from "./views/admin/Abonar";
+import Canjear from "./views/admin/Canjear";
 
 const AppRoutes = () => {
   return (
@@ -13,7 +14,8 @@ const AppRoutes = () => {
       <Route path="/client" element={<ClientHome />} />
       <Route path="/admin" element={<AdminHome />} />
       <Route path="/admin/registrar" element={<RegisterFromAdmin />} />
-      <Route path="/registro" element={<RegisterClient />} />
+      <Route path="/admin/canjear" element={<Canjear />} />
+      <Route path="/admin/abonar" element={<Abonar />} />
     </Routes>
   );
 };

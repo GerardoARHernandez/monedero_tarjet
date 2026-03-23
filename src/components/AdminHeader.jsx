@@ -24,8 +24,8 @@ const AdminHeader = () => {
         {/* Nav */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-300">
           <Link to="/admin" className="hover:text-white transition-colors">Dashboard</Link>
-          <Link to="#" className="hover:text-white transition-colors">Abonar</Link>
-          <Link to="#" className="hover:text-white transition-colors">Canjear</Link>
+          <Link to="/admin/abonar" className="hover:text-white transition-colors">Abonar</Link>
+          <Link to="/admin/canjear" className="hover:text-white transition-colors">Canjear</Link>
           <Link to="/admin/registrar" className="hover:text-white transition-colors">Registrar</Link>
         </nav>
 
