@@ -1,5 +1,5 @@
 // src/views/admin/RegisterFromAdmin.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import AdminHeader from "../../components/AdminHeader";
@@ -28,31 +28,80 @@ const RegisterFromAdmin = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
   const [titulares, setTitulares] = useState([]); // Lista de titulares disponibles
+  const [filteredTitulares, setFilteredTitulares] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [searchTitular, setSearchTitular] = useState("");
+  const [selectedTitular, setSelectedTitular] = useState(null);
   const [loadingTitulares, setLoadingTitulares] = useState(false);
+  const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
 
-  // Función para cargar la lista de titulares (ajusta según tu API)
+  // Cargar la lista de titulares (usuarios con titular = 1)
   useEffect(() => {
     if (formData.esTitular === "0") {
       cargarTitulares();
+    } else {
+      // Limpiar datos cuando cambia a "Sí"
+      setSearchTitular("");
+      setSelectedTitular(null);
+      setFormData(prev => ({ ...prev, idTitular: "" }));
+      setShowDropdown(false);
     }
   }, [formData.esTitular]);
+
+  // Cerrar dropdown al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target) && 
+          inputRef.current && !inputRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Filtrar titulares cuando cambia el término de búsqueda
+  useEffect(() => {
+    if (!searchTitular.trim() || formData.esTitular !== "0") {
+      setFilteredTitulares([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    const searchLower = searchTitular.toLowerCase();
+    const filtered = titulares.filter(titular => {
+      const nombreCompleto = `${titular.usuarioNombre} ${titular.usuarioApellido}`.toLowerCase();
+      const telefono = titular.usuarioTelefono.trim();
+      const telefonoFormateado = formatPhoneNumberForDisplay(telefono);
+      
+      return nombreCompleto.includes(searchLower) || 
+             telefono.includes(searchLower) ||
+             telefonoFormateado.includes(searchLower);
+    });
+    
+    setFilteredTitulares(filtered.slice(0, 10));
+    setShowDropdown(filtered.length > 0);
+  }, [searchTitular, titulares, formData.esTitular]);
 
   const cargarTitulares = async () => {
     setLoadingTitulares(true);
     try {
-      // Aquí debes ajustar el endpoint según tu API para obtener la lista de titulares
-      // Ejemplo: GET /api/users/titulares
-      const response = await fetch("https://souvenir-site.com/TarjetCashBack/api/users/titulares", {
+      // Obtener todos los usuarios del negocio (negocioId = 1)
+      const response = await fetch("https://souvenir-site.com/TarjetCashBack/api/users/1", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          // "Authorization": `Bearer ${token}`
         }
       });
       
       if (response.ok) {
         const data = await response.json();
-        setTitulares(data);
+        // Filtrar solo los que son titulares (titular === 1)
+        const soloTitulares = data.data.filter(user => user.titular === 1);
+        setTitulares(soloTitulares);
+      } else {
+        console.error("Error al cargar titulares");
       }
     } catch (error) {
       console.error("Error al cargar titulares:", error);
@@ -61,7 +110,17 @@ const RegisterFromAdmin = () => {
     }
   };
 
-  // Función para formatear el número de teléfono
+  // Función para formatear el número de teléfono para mostrar
+  const formatPhoneNumberForDisplay = (phone) => {
+    if (!phone) return "";
+    const clean = phone.toString().trim();
+    if (clean.length === 10) {
+      return `${clean.slice(0, 3)}-${clean.slice(3, 6)}-${clean.slice(6)}`;
+    }
+    return clean;
+  };
+
+  // Función para formatear el número de teléfono mientras se escribe
   const formatPhoneNumber = (value) => {
     const numbers = value.replace(/\D/g, "");
     
@@ -100,6 +159,20 @@ const RegisterFromAdmin = () => {
     // Limpiar mensaje de éxito cuando el usuario modifica algo
     if (success) {
       setSuccess(null);
+    }
+  };
+
+  const seleccionarTitular = (titular) => {
+    setSelectedTitular(titular);
+    setSearchTitular(`${titular.usuarioNombre} ${titular.usuarioApellido} - ${formatPhoneNumberForDisplay(titular.usuarioTelefono)}`);
+    setFormData(prev => ({
+      ...prev,
+      idTitular: titular.usuarioId
+    }));
+    setShowDropdown(false);
+    // Limpiar error del campo idTitular
+    if (errors.idTitular) {
+      setErrors(prev => ({ ...prev, idTitular: "" }));
     }
   };
 
@@ -157,10 +230,6 @@ const RegisterFromAdmin = () => {
     if (formData.esTitular === "0") {
       if (!formData.idTitular) {
         newErrors.idTitular = "Debe seleccionar un titular";
-      } else if (isNaN(parseInt(formData.idTitular))) {
-        newErrors.idTitular = "El ID del titular debe ser un número válido";
-      } else if (parseInt(formData.idTitular) <= 0) {
-        newErrors.idTitular = "El ID del titular debe ser mayor a 0";
       }
     }
 
@@ -189,15 +258,15 @@ const RegisterFromAdmin = () => {
       
       // Preparar los datos para la API
       const apiData = {
-        negocioId: 1, // Asumiendo que el negocioId es 1, ajusta según sea necesario
-        titular: parseInt(formData.esTitular), // 1 o 0
+        negocioId: 1,
+        titular: parseInt(formData.esTitular),
         idTitular: idTitular,
         usuarioNombre: formData.nombre.trim(),
         usuarioApellido: formData.apellido.trim(),
         usuarioTelefono: cleanPhone,
         usuarioPass: formData.password,
-        usuarioCorreo: formData.email.trim() || null, // Si está vacío, enviar null
-        usuarioFechaNacimiento: formData.fechaNacimiento || null // Si está vacío, enviar null
+        usuarioCorreo: formData.email.trim() || null,
+        usuarioFechaNacimiento: formData.fechaNacimiento || null
       };
       
       try {
@@ -205,8 +274,6 @@ const RegisterFromAdmin = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            // Agrega aquí cualquier token de autenticación si es necesario
-            // "Authorization": `Bearer ${token}`
           },
           body: JSON.stringify(apiData)
         });
@@ -223,6 +290,7 @@ const RegisterFromAdmin = () => {
             usuarioCorreo: data.data.usuarioCorreo,
             esTitular: data.data.titular === 1 ? "Sí" : "No",
             idTitularUsado: idTitular,
+            nombreTitular: selectedTitular ? `${selectedTitular.usuarioNombre} ${selectedTitular.usuarioApellido}` : null,
             usuarioMiembroDesde: new Date(data.data.usuarioMiembroDesde).toLocaleString('es-MX')
           });
           
@@ -238,6 +306,8 @@ const RegisterFromAdmin = () => {
             esTitular: "1",
             idTitular: ""
           });
+          setSearchTitular("");
+          setSelectedTitular(null);
           
           // Limpiar el mensaje de éxito después de 5 segundos
           setTimeout(() => {
@@ -429,31 +499,78 @@ const RegisterFromAdmin = () => {
               </div>
             </div>
 
-            {/* Campo para seleccionar ID del titular (solo cuando NO es titular) */}
+            {/* Buscador de titular (solo cuando NO es titular) */}
             {formData.esTitular === "0" && (
               <div className="bg-white dark:bg-gray-700 p-4 rounded-xl border border-gray-300 dark:border-gray-600">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  ID del Titular <span className="text-red-500">*</span>
+                  Buscar Titular <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="number"
-                  name="idTitular"
-                  value={formData.idTitular}
-                  onChange={handleChange}
-                  placeholder="Ej: 1, 2, 3..."
-                  min="1"
-                  step="1"
-                  className={`w-full px-4 py-2.5 rounded-lg border ${
-                    errors.idTitular 
-                      ? 'border-red-500 dark:border-red-500' 
-                      : 'border-gray-400 dark:border-gray-600'
-                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition`}
-                />
+                <div className="relative">
+                  <div className="relative">
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={searchTitular}
+                      onChange={(e) => setSearchTitular(e.target.value)}
+                      placeholder="Buscar titular por nombre o teléfono..."
+                      className={`w-full px-4 py-2.5 rounded-lg border ${
+                        errors.idTitular 
+                          ? 'border-red-500 dark:border-red-500' 
+                          : 'border-gray-400 dark:border-gray-600'
+                      } bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition`}
+                      autoComplete="off"
+                    />
+                    {loadingTitulares && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <svg className="animate-spin h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Dropdown de resultados */}
+                  {showDropdown && filteredTitulares.length > 0 && (
+                    <div 
+                      ref={dropdownRef}
+                      className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-64 overflow-y-auto"
+                    >
+                      {filteredTitulares.map((titular) => (
+                        <button
+                          key={titular.usuarioId}
+                          type="button"
+                          onClick={() => seleccionarTitular(titular)}
+                          className="w-full text-left px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition border-b border-gray-200 dark:border-gray-700 last:border-b-0"
+                        >
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                {titular.usuarioNombre} {titular.usuarioApellido}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                {formatPhoneNumberForDisplay(titular.usuarioTelefono)}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
+                                Titular
+                              </span>
+                              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                ID: {titular.usuarioId}
+                              </p>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 {errors.idTitular && (
                   <p className="mt-1 text-xs text-red-500">{errors.idTitular}</p>
                 )}
                 <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  Ingrese el ID del titular al que pertenecerá esta cuenta
+                  Busque al titular por nombre o teléfono. Esta cuenta quedará asociada a ese titular.
                 </p>
               </div>
             )}
@@ -537,7 +654,12 @@ const RegisterFromAdmin = () => {
                   <p><span className="font-medium">Teléfono:</span> {success.usuarioTelefono}</p>
                   {success.usuarioCorreo && <p><span className="font-medium">Email:</span> {success.usuarioCorreo}</p>}
                   <p><span className="font-medium">Cuenta titular:</span> {success.esTitular}</p>
-                  <p><span className="font-medium">ID Titular asociado:</span> {success.idTitularUsado === 0 ? "N/A (es titular)" : success.idTitularUsado}</p>
+                  {success.idTitularUsado !== 0 && (
+                    <p><span className="font-medium">Titular asociado:</span> {success.nombreTitular} (ID: {success.idTitularUsado})</p>
+                  )}
+                  {success.idTitularUsado === 0 && (
+                    <p><span className="font-medium">ID Titular asociado:</span> N/A (es titular)</p>
+                  )}
                   <p><span className="font-medium">Miembro desde:</span> {success.usuarioMiembroDesde}</p>
                 </div>
               </div>
