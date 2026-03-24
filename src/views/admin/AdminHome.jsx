@@ -24,7 +24,7 @@ const AdminHome = () => {
     const user = JSON.parse(storedUser);
     // Verificar si es admin (puedes ajustar según tu lógica)
     // Por ahora, asumimos que cualquier usuario que llega a admin es admin
-    fetchUsers(1); // Negocio ID = 1
+    fetchUsers(2); // Negocio ID = 1
   }, [navigate]);
 
   const fetchUsers = async (negocioId) => {
