@@ -80,14 +80,7 @@ const Login = () => {
     // Eliminar todo lo que no sea número
     const numbers = value.replace(/\D/g, "");
     
-    // Aplicar formato dependiendo de la longitud
-    if (numbers.length <= 3) {
-      return numbers;
-    } else if (numbers.length <= 6) {
-      return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
-    } else {
-      return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)}-${numbers.slice(6, 10)}`;
-    }
+    return numbers;    
   };
 
   const handlePhoneChange = (e) => {
