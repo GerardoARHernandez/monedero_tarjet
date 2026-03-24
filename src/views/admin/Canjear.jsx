@@ -81,7 +81,7 @@ const Canjear = () => {
   const cargarUsuarios = async () => {
     setLoadingUsers(true);
     try {
-      const response = await fetch("https://souvenir-site.com/TarjetCashBack/api/users/1", {
+      const response = await fetch("https://souvenir-site.com/TarjetCashBack/api/users/2", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

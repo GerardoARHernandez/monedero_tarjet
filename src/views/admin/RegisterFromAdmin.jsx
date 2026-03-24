@@ -87,8 +87,8 @@ const RegisterFromAdmin = () => {
   const cargarTitulares = async () => {
     setLoadingTitulares(true);
     try {
-      // Obtener todos los usuarios del negocio (negocioId = 1)
-      const response = await fetch("https://souvenir-site.com/TarjetCashBack/api/users/1", {
+      // Obtener todos los usuarios del negocio (negocioId = 2)
+      const response = await fetch("https://souvenir-site.com/TarjetCashBack/api/users/2", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -258,7 +258,7 @@ const RegisterFromAdmin = () => {
       
       // Preparar los datos para la API
       const apiData = {
-        negocioId: 1,
+        negocioId: 2,
         titular: parseInt(formData.esTitular),
         idTitular: idTitular,
         usuarioNombre: formData.nombre.trim(),

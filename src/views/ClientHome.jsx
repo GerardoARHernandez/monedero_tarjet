@@ -91,9 +91,7 @@ const ClientHome = () => {
   const formatPhoneForDisplay = (phone) => {
     if (!phone) return "";
     const clean = phone.toString().replace(/\s/g, "");
-    if (clean.length === 10) {
-      return `${clean.slice(0, 3)}-${clean.slice(3, 6)}-${clean.slice(6)}`;
-    }
+    
     return phone;
   };
 
@@ -354,6 +352,7 @@ const ClientHome = () => {
         isOpen={isQRModalOpen}
         onClose={() => setIsQRModalOpen(false)}
         phoneNumber={userData?.usuarioTelefono ? formatPhoneForDisplay(userData.usuarioTelefono.trim()) : ""}
+        usuarioId={userData?.usuarioId}
       />
 
       <ClientFooter />

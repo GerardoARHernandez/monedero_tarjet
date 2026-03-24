@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
 import { X } from 'lucide-react';
 
-const QRModal = ({ isOpen, onClose, phoneNumber }) => {
+const QRModal = ({ isOpen, onClose, phoneNumber, usuarioId }) => {
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [qrGenerated, setQrGenerated] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -13,6 +13,28 @@ const QRModal = ({ isOpen, onClose, phoneNumber }) => {
   const qrColor = '#4f46e5'; // indigo-600
   const lightColor = '#FFFFFF';
 
+  // Formatear el número de teléfono con ID
+  const formatPhoneWithId = () => {
+    if (!phoneNumber) return '';
+    const cleanPhone = phoneNumber.replace(/\D/g, '');
+    if (usuarioId) {
+      return `${usuarioId}-${cleanPhone}`;
+    }
+    // Si no hay ID, formatear solo el teléfono
+    if (cleanPhone.length === 10) {
+      return `${cleanPhone.slice(0, 3)}-${cleanPhone.slice(3, 6)}-${cleanPhone.slice(6)}`;
+    }
+    return phoneNumber;
+  };
+
+  // Formatear el número de teléfono para mostrar (con guiones)
+  const formatPhoneForDisplay = (phone) => {
+    if (!phone) return '';
+    const clean = phone.toString().trim();
+    
+    return clean;
+  };
+
   // Generar el código QR
   const generateQR = async () => {
     if (!phoneNumber) return;
@@ -21,9 +43,15 @@ const QRModal = ({ isOpen, onClose, phoneNumber }) => {
     setError('');
     
     try {
-      // Crear contenido del QR (formato tel: para teléfonos)
+      // Crear contenido del QR con formato: ID-NÚMERO_TELÉFONO
       const cleanPhone = phoneNumber.replace(/\D/g, '');
-      const qrContent = `tel:${cleanPhone}`;
+      let qrContent;
+      
+      if (usuarioId) {
+        qrContent = `${usuarioId}-${cleanPhone}`;
+      } else {
+        qrContent = `tel:${cleanPhone}`;
+      }
       
       // Generar QR como Data URL
       const url = await QRCode.toDataURL(qrContent, {
@@ -123,15 +151,28 @@ const QRModal = ({ isOpen, onClose, phoneNumber }) => {
             </div>
           </div>
 
-          {/* Información del número */}
+          {/* Información del identificador */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-center mb-2">
-              Número de teléfono asociado:
+              Identificador para pago:
             </label>
             <div className="p-4 rounded-xl border-2 border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 text-center">
-              <span className="text-lg font-mono font-bold text-indigo-700 dark:text-indigo-300">
-                {phoneNumber}
-              </span>
+              {usuarioId ? (
+                <>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">ID: </span>
+                  <span className="text-lg font-mono font-bold text-indigo-700 dark:text-indigo-300">
+                    {usuarioId}
+                  </span>
+                  <span className="text-lg font-mono font-bold text-indigo-700 dark:text-indigo-300 mx-1">-</span>
+                  <span className="text-lg font-mono font-bold text-indigo-700 dark:text-indigo-300">
+                    {formatPhoneForDisplay(phoneNumber)}
+                  </span>
+                </>
+              ) : (
+                <span className="text-lg font-mono font-bold text-indigo-700 dark:text-indigo-300">
+                  {formatPhoneForDisplay(phoneNumber)}
+                </span>
+              )}
             </div>
           </div>
 
@@ -147,7 +188,10 @@ const QRModal = ({ isOpen, onClose, phoneNumber }) => {
 
           {/* Nota adicional */}
           <p className="text-xs text-center text-gray-400 dark:text-gray-500 mt-4">
-            Este código QR contiene tu número de teléfono para realizar pagos de forma segura
+            {usuarioId 
+              ? "Este código QR contiene tu ID y número de teléfono para realizar pagos de forma segura"
+              : "Este código QR contiene tu número de teléfono para realizar pagos de forma segura"
+            }
           </p>
         </div>
       </div>
