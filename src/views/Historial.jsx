@@ -1,9 +1,9 @@
 // src/views/client/Historial.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import ClientHeader from "../../components/ClientHeader";
-import ClientFooter from "../../components/ClientFooter";
-import { useTheme } from "../../context/ThemeContext";
+import ClientHeader from "../components/ClientHeader";
+import ClientFooter from "../components/ClientFooter";
+import { useTheme } from "../context/ThemeContext";
 
 const Historial = () => {
   const navigate = useNavigate();
