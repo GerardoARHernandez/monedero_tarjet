@@ -5,6 +5,7 @@ import ClientHeader from "../components/ClientHeader";
 import ClientFooter from "../components/ClientFooter";
 import QRModal from "../components/QRModal"; 
 import { useTheme } from "../context/ThemeContext"; 
+import { Link } from "react-router-dom";
 
 const ClientHome = () => {
   const navigate = useNavigate();
