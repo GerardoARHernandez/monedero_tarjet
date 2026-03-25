@@ -19,7 +19,6 @@ const ClientHome = () => {
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
-      // Si no hay usuario, redirigir al login
       navigate("/");
       return;
     }
@@ -36,8 +35,6 @@ const ClientHome = () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          // Si necesitas token de autenticación, agrégalo aquí
-          // "Authorization": `Bearer ${localStorage.getItem("token")}`
         }
       });
 
@@ -91,7 +88,6 @@ const ClientHome = () => {
   const formatPhoneForDisplay = (phone) => {
     if (!phone) return "";
     const clean = phone.toString().replace(/\s/g, "");
-    
     return phone;
   };
 
@@ -116,8 +112,18 @@ const ClientHome = () => {
     });
   };
 
-  // Calcular estadísticas de transacciones
+  // Calcular estadísticas de transacciones (solo si es titular)
   const calculateStats = () => {
+    if (userData?.titular !== 1) {
+      return {
+        ingresosMes: 0,
+        gastosMes: 0,
+        totalMovimientos: 0,
+        totalRecargas: 0,
+        totalCanjes: 0
+      };
+    }
+    
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
@@ -146,6 +152,7 @@ const ClientHome = () => {
   };
 
   const stats = calculateStats();
+  const esTitular = userData?.titular === 1;
 
   if (loading) {
     return (
@@ -181,7 +188,7 @@ const ClientHome = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-      <ClientHeader />
+      <ClientHeader esTitular={esTitular} />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-8 space-y-6">
         {/* Balance card */}
@@ -250,101 +257,122 @@ const ClientHome = () => {
           </div>
         </div>
 
-        {/* Quick stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { label: "Ingresos del mes", value: `$${stats.ingresosMes.toFixed(2)}`, color: "text-green-600 dark:text-green-400" },
-            { label: "Gastos del mes", value: `$${stats.gastosMes.toFixed(2)}`, color: "text-red-500 dark:text-red-400" },
-            { label: "Movimientos", value: stats.totalMovimientos.toString(), color: "text-indigo-600 dark:text-indigo-400" },
-            { label: "Recargas", value: stats.totalRecargas.toString(), color: "text-indigo-600 dark:text-indigo-400" },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-400 dark:border-gray-700">
-              <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
-              <p className={`text-xl font-bold mt-1 ${stat.color}`}>{stat.value}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Recent transactions */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-400 dark:border-gray-700">
-          <div className="px-6 py-4 border-b border-gray-400 dark:border-gray-700 flex items-center justify-between">
-            <h2 className="font-semibold text-gray-800 dark:text-white">Movimientos recientes</h2>
-            <a href="#" className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Ver todos</a>
+        {/* Quick stats - Solo mostrar si es titular */}
+        {esTitular && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: "Ingresos del mes", value: `$${stats.ingresosMes.toFixed(2)}`, color: "text-green-600 dark:text-green-400" },
+              { label: "Gastos del mes", value: `$${stats.gastosMes.toFixed(2)}`, color: "text-red-500 dark:text-red-400" },
+              { label: "Movimientos", value: stats.totalMovimientos.toString(), color: "text-indigo-600 dark:text-indigo-400" },
+              { label: "Recargas", value: stats.totalRecargas.toString(), color: "text-indigo-600 dark:text-indigo-400" },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-400 dark:border-gray-700">
+                <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
+                <p className={`text-xl font-bold mt-1 ${stat.color}`}>{stat.value}</p>
+              </div>
+            ))}
           </div>
-          {transactions.length === 0 ? (
-            <div className="px-6 py-12 text-center">
-              <svg className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <p className="text-gray-500 dark:text-gray-400">No hay movimientos registrados</p>
+        )}
+
+        {/* Recent transactions - Solo mostrar si es titular */}
+        {esTitular && (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-400 dark:border-gray-700">
+            <div className="px-6 py-4 border-b border-gray-400 dark:border-gray-700 flex items-center justify-between">
+              <h2 className="font-semibold text-gray-800 dark:text-white">Movimientos recientes</h2>
+              <Link to="/client/historial" className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+                Ver todos
+              </Link>
             </div>
-          ) : (
-            <ul className="divide-y divide-gray-400 dark:divide-gray-700">
-              {transactions.slice(0, 5).map((tx) => {
-                const isCredit = tx.transaccionTipo === "A";
-                const amount = tx.transaccionImporte;
-                const description = getTransactionDescription(tx);
-                const reference = getReferenceNumber(tx);
-                
-                return (
-                  <li key={tx.transaccionId} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 flex-1">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg
-                          ${isCredit 
-                            ? "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400" 
-                            : "bg-red-100 dark:bg-red-900/50 text-red-500 dark:text-red-400"}`}>
-                          {isCredit ? "↓" : "↑"}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-sm font-medium text-gray-800 dark:text-white">
-                              {description}
-                            </p>
-                            {reference && reference !== "0" && (
-                              <span className="text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
-                                {reference}
-                              </span>
-                            )}
+            {transactions.length === 0 ? (
+              <div className="px-6 py-12 text-center">
+                <svg className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p className="text-gray-500 dark:text-gray-400">No hay movimientos registrados</p>
+              </div>
+            ) : (
+              <ul className="divide-y divide-gray-400 dark:divide-gray-700">
+                {transactions.slice(0, 5).map((tx) => {
+                  const isCredit = tx.transaccionTipo === "A";
+                  const amount = tx.transaccionImporte;
+                  const description = getTransactionDescription(tx);
+                  const reference = getReferenceNumber(tx);
+                  
+                  return (
+                    <li key={tx.transaccionId} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg
+                            ${isCredit 
+                              ? "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400" 
+                              : "bg-red-100 dark:bg-red-900/50 text-red-500 dark:text-red-400"}`}>
+                            {isCredit ? "↓" : "↑"}
                           </div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <p className="text-xs text-gray-400 dark:text-gray-500">
-                              {formatDate(tx.transaccionFecha)}
-                            </p>
-                            <span className="text-xs text-gray-400">•</span>
-                            <p className="text-xs text-gray-400 dark:text-gray-500">
-                              {formatTime(tx.transaccionFecha)}
-                            </p>
-                            {tx.transaccionTipo === "C" && tx.transaccionFolioTick !== "0" && (
-                              <>
-                                <span className="text-xs text-gray-400">•</span>
-                                <p className="text-xs text-gray-400 dark:text-gray-500">
-                                  Folio: {tx.transaccionFolioTick}
-                                </p>
-                              </>
-                            )}
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="text-sm font-medium text-gray-800 dark:text-white">
+                                {description}
+                              </p>
+                              {reference && reference !== "0" && (
+                                <span className="text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
+                                  {reference}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-xs text-gray-400 dark:text-gray-500">
+                                {formatDate(tx.transaccionFecha)}
+                              </p>
+                              <span className="text-xs text-gray-400">•</span>
+                              <p className="text-xs text-gray-400 dark:text-gray-500">
+                                {formatTime(tx.transaccionFecha)}
+                              </p>
+                              {tx.transaccionTipo === "C" && tx.transaccionFolioTick !== "0" && (
+                                <>
+                                  <span className="text-xs text-gray-400">•</span>
+                                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                                    Folio: {tx.transaccionFolioTick}
+                                  </p>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
+                        <span className={`text-sm font-bold ${isCredit 
+                          ? "text-green-600 dark:text-green-400" 
+                          : "text-red-500 dark:text-red-400"}`}>
+                          {isCredit ? "+" : "-"}${amount.toFixed(2)}
+                        </span>
                       </div>
-                      <span className={`text-sm font-bold ${isCredit 
-                        ? "text-green-600 dark:text-green-400" 
-                        : "text-red-500 dark:text-red-400"}`}>
-                        {isCredit ? "+" : "-"}${amount.toFixed(2)}
-                      </span>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-          {transactions.length > 5 && (
-            <div className="px-6 py-3 border-t border-gray-400 dark:border-gray-700 text-center">
-              <button className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
-                Ver los {transactions.length - 5} movimientos restantes
-              </button>
-            </div>
-          )}
-        </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            {transactions.length > 5 && (
+              <div className="px-6 py-3 border-t border-gray-400 dark:border-gray-700 text-center">
+                <Link to="/client/historial" className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+                  Ver los {transactions.length - 5} movimientos restantes
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Mensaje para cuentas adicionales */}
+        {!esTitular && (
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6 text-center">
+            <svg className="w-12 h-12 mx-auto text-amber-500 dark:text-amber-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-amber-700 dark:text-amber-300 font-medium">
+              Esta es una cuenta adicional
+            </p>
+            <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
+              El historial de movimientos solo está disponible para cuentas titulares.
+            </p>
+          </div>
+        )}
       </main>
 
       {/* Modal QR */}

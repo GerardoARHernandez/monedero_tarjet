@@ -1,13 +1,16 @@
 import { BrowserRouter } from "react-router-dom";
 import AppRoutes from "./routes";
 import { ThemeProvider } from './context/ThemeContext';
+import { BusinessProvider } from './context/BusinessContext';
 
 function App() {
   return (
     <BrowserRouter>
-      <ThemeProvider>
-        <AppRoutes />        
-      </ThemeProvider>
+      <BusinessProvider>
+        <ThemeProvider>
+          <AppRoutes />        
+        </ThemeProvider>
+      </BusinessProvider>
     </BrowserRouter>
   );
 }

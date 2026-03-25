@@ -87,8 +87,11 @@ const RegisterFromAdmin = () => {
   const cargarTitulares = async () => {
     setLoadingTitulares(true);
     try {
-      // Obtener todos los usuarios del negocio (negocioId = 2)
-      const response = await fetch("https://souvenir-site.com/TarjetCashBack/api/users/2", {
+      const storedUser = localStorage.getItem("user");
+      const user = storedUser ? JSON.parse(storedUser) : null;
+      const negocioId = user?.negocioId || 1;
+      
+      const response = await fetch(`https://souvenir-site.com/TarjetCashBack/api/users/${negocioId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -97,7 +100,6 @@ const RegisterFromAdmin = () => {
       
       if (response.ok) {
         const data = await response.json();
-        // Filtrar solo los que son titulares (titular === 1)
         const soloTitulares = data.data.filter(user => user.titular === 1);
         setTitulares(soloTitulares);
       } else {
@@ -245,20 +247,21 @@ const RegisterFromAdmin = () => {
       setLoading(true);
       setSuccess(null);
       
-      // Limpiar el teléfono para enviarlo sin formato
+      const storedUser = localStorage.getItem("user");
+      const user = storedUser ? JSON.parse(storedUser) : null;
+      const negocioId = user?.negocioId || 1;
+      
       const cleanPhone = formData.telefono.replace(/\D/g, "");
       
-      // Determinar el idTitular según el caso
       let idTitular;
       if (formData.esTitular === "1") {
-        idTitular = 0; // Si es titular, mandar 0
+        idTitular = 0;
       } else {
-        idTitular = parseInt(formData.idTitular); // Si no es titular, usar el ID seleccionado
+        idTitular = parseInt(formData.idTitular);
       }
       
-      // Preparar los datos para la API
       const apiData = {
-        negocioId: 2,
+        negocioId: negocioId, // Usar el negocioId del usuario
         titular: parseInt(formData.esTitular),
         idTitular: idTitular,
         usuarioNombre: formData.nombre.trim(),

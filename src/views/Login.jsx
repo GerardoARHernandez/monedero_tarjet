@@ -46,7 +46,7 @@ const Login = () => {
       const data = await response.json();
 
       if (data.success) {
-        // Guardar información del usuario en localStorage o contexto
+        // Guardar información del usuario
         localStorage.setItem("user", JSON.stringify({
           usuarioId: data.data.usuarioId,
           usuarioNombre: data.data.usuarioNombre,
@@ -55,7 +55,8 @@ const Login = () => {
           usuarioRol: data.data.usuarioRol,
           tipoUsuario: data.data.tipoUsuario,
           titular: data.data.titular,
-          idTitular: data.data.idTitular
+          idTitular: data.data.idTitular,
+          negocioId: data.data.negocioId || 1 // Guardar el negocioId del usuario
         }));
         
         // Redirigir según el rol
@@ -189,11 +190,7 @@ const Login = () => {
               )}
             </button>
           </form>
-
-          {/* Hint */}
-          <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-6">
-            Tip: usa <span className="font-mono bg-gray-100 dark:bg-gray-700 px-1 rounded">55-1234-5678</span> para entrar como administrador
-          </p>
+          
         </div>
       </div>
     </div>

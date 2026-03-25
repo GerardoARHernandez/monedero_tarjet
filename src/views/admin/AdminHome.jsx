@@ -9,7 +9,9 @@ const AdminHome = () => {
   const navigate = useNavigate();
   const { isDark } = useTheme();
   const [users, setUsers] = useState([]);
+  const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingBusiness, setLoadingBusiness] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -22,10 +24,39 @@ const AdminHome = () => {
     }
     
     const user = JSON.parse(storedUser);
-    // Verificar si es admin (puedes ajustar según tu lógica)
-    // Por ahora, asumimos que cualquier usuario que llega a admin es admin
-    fetchUsers(2); // Negocio ID = 1
+    const negocioId = user.negocioId || 1;
+    
+    // Cargar información del negocio
+    fetchBusiness(negocioId);
+    // Cargar usuarios del negocio
+    fetchUsers(negocioId);
   }, [navigate]);
+
+  const fetchBusiness = async (negocioId) => {
+    setLoadingBusiness(true);
+    try {
+      const response = await fetch(`https://souvenir-site.com/TarjetCashBack/api/negocios/${negocioId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setBusiness(data.data);
+        // Guardar en localStorage para persistencia
+        localStorage.setItem("business", JSON.stringify(data.data));
+      } else {
+        console.error("Error al cargar negocio:", data.message);
+      }
+    } catch (error) {
+      console.error("Error al cargar negocio:", error);
+    } finally {
+      setLoadingBusiness(false);
+    }
+  };
 
   const fetchUsers = async (negocioId) => {
     setLoading(true);
@@ -35,15 +66,13 @@ const AdminHome = () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          // Si necesitas token de autenticación, agrégalo aquí
-          // "Authorization": `Bearer ${localStorage.getItem("token")}`
         }
       });
 
       const data = await response.json();
 
       if (data.success) {
-        // Para cada usuario, necesitamos obtener su saldo actual
+        // Para cada usuario, obtener su saldo actual
         const usersWithBalance = await Promise.all(
           data.data.map(async (user) => {
             const balanceData = await fetchUserBalance(user.usuarioId);
@@ -110,7 +139,15 @@ const AdminHome = () => {
     );
   });
 
-  if (loading) {
+  // Calcular estadísticas
+  const stats = {
+    totalUsuarios: users.length,
+    totalTitulares: users.filter(u => u.titular === 1).length,
+    totalAdicionales: users.filter(u => u.titular === 0).length,
+    saldoTotal: users.reduce((sum, u) => sum + (u.balance || 0), 0)
+  };
+
+  if (loading || loadingBusiness) {
     return (
       <div className="min-h-screen flex flex-col bg-blue-100 dark:bg-gray-950">
         <AdminHeader />
@@ -120,7 +157,7 @@ const AdminHome = () => {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">Cargando usuarios...</p>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Cargando información...</p>
           </div>
         </main>
         <AdminFooter />
@@ -136,7 +173,12 @@ const AdminHome = () => {
           <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 rounded-lg p-6 max-w-md">
             <p className="text-red-800 dark:text-red-300 text-center">❌ {error}</p>
             <button
-              onClick={() => fetchUsers(1)}
+              onClick={() => {
+                const storedUser = localStorage.getItem("user");
+                const user = storedUser ? JSON.parse(storedUser) : null;
+                const negocioId = user?.negocioId || 1;
+                fetchUsers(negocioId);
+              }}
               className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition"
             >
               Reintentar
@@ -153,6 +195,55 @@ const AdminHome = () => {
       <AdminHeader />
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8 space-y-6">
+        {/* Banner de información del negocio */}
+        {business && (
+          <div 
+            className="rounded-2xl p-6 shadow-lg transition-all hover:shadow-xl"
+            style={{ 
+              background: `linear-gradient(135deg, ${business.negocioColor1 || '#18665F'}, ${business.negocioColor2 || '#209E94'})` 
+            }}
+          >
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-2xl font-bold text-white">
+                  {business.negocioNombre} {business.negocioApellidos}
+                </h3>
+                <p className="text-white/80 text-sm mt-1">{business.negocioDesc}</p>
+                {business.reglasAcumulable && (
+                  <span className="inline-block mt-2 text-xs bg-white/20 text-white px-2 py-1 rounded-full">
+                    ✓ Acumulable
+                  </span>
+                )}
+              </div>
+              <div className="text-right">
+                <p className="text-white/70 text-xs">ID Negocio: <span className="font-mono">{business.negocioId}</span></p>
+                <p className="text-white/70 text-xs mt-1">
+                  Vigencia: {new Date(business.negocioVigencia).toLocaleDateString('es-MX')}
+                </p>
+                {business.negocioIdTarjet && (
+                  <p className="text-white/70 text-xs mt-1">ID Tarjet: {business.negocioIdTarjet}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-300 dark:border-gray-700">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Total usuarios</p>
+            <p className="text-2xl font-bold text-gray-800 dark:text-white">{stats.totalUsuarios}</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-300 dark:border-gray-700">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Cuentas titulares</p>
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.totalTitulares}</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-300 dark:border-gray-700">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Cuentas adicionales</p>
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.totalAdicionales}</p>
+          </div>
+        </div>
+
         {/* Users table */}
         <div className="bg-blue-50 dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-700 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-500 dark:border-gray-700">
@@ -288,23 +379,8 @@ const AdminHome = () => {
           {/* Resumen de estadísticas */}
           {users.length > 0 && (
             <div className="px-6 py-4 border-t border-gray-500 dark:border-gray-700 bg-blue-50 dark:bg-gray-900">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div>
-                  <p className="text-gray-500 dark:text-gray-400">Total usuarios</p>
-                  <p className="text-xl font-bold text-gray-800 dark:text-white">{users.length}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 dark:text-gray-400">Cuentas titulares</p>
-                  <p className="text-xl font-bold text-green-600 dark:text-green-400">
-                    {users.filter(u => u.titular === 1).length}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-500 dark:text-gray-400">Cuentas adicionales</p>
-                  <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                    {users.filter(u => u.titular === 0).length}
-                  </p>
-                </div>                
+              <div className="flex flex-wrap justify-between items-center gap-4 text-sm text-gray-400 dark:text-gray-500">                
+                Última actualización: {new Date().toLocaleString('es-MX')}
               </div>
             </div>
           )}
