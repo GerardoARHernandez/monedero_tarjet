@@ -243,14 +243,14 @@ const ClientHome = () => {
             <div 
               className="rounded-2xl p-6 text-white shadow-lg"
               style={{ 
-                background: `linear-gradient(135deg, ${color1}, ${color2})` 
+                background: `linear-gradient(145deg, ${color1}, ${color2})` 
               }}
             >
               <div>
                 <div className="bottom-4 left-4 text-white">
                   <p className="text-sm font-medium opacity-90">Bienvenido a <strong>tu monedero digital</strong></p>                
                 </div>
-                <p className="text-sm font-medium flex items-center gap-2 pt-2" style={{ color: `${color1}20` }}>
+                <p className="text-sm font-medium flex items-center gap-2 pt-2 text-white" >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -263,17 +263,17 @@ const ClientHome = () => {
               
               <div className="mt-4 pt-4 border-t" style={{ borderColor: `${color1}40` }}>
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm" style={{ color: `${color1}20` }}>
+                  <div className="text-white">
+                    <p className="text-sm">
                       {userData?.usuarioNombre} {userData?.usuarioApellido}
                     </p>
-                    <p className="text-xs flex items-center gap-1 mt-1" style={{ color: `${color1}20` }}>
+                    <p className="text-xs flex items-center gap-1 mt-1">
                       {userData?.titular === 1 ? "Cuenta Titular" : "Cuenta Adicional"}
                       {userData?.idTitular > 0 && ` · ID Titular: ${userData.idTitular}`}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs" style={{ color: `${color1}20` }}>Saldo utilizado</p>
+                  <div className="text-right text-white">
+                    <p className="text-xs" >Saldo utilizado</p>
                     <p className="text-sm font-semibold">
                       ${userData?.montoUtilizado?.toFixed(2) || "0.00"}
                     </p>
@@ -305,8 +305,8 @@ const ClientHome = () => {
             {[
               { label: "Ingresos del mes", value: `$${stats.ingresosMes.toFixed(2)}`, color: "text-green-600 dark:text-green-400" },
               { label: "Gastos del mes", value: `$${stats.gastosMes.toFixed(2)}`, color: "text-red-500 dark:text-red-400" },
-              { label: "Movimientos", value: stats.totalMovimientos.toString(), color: `text-[${color1}] dark:text-[${color2}]` },
-              { label: "Recargas", value: stats.totalRecargas.toString(), color: `text-[${color1}] dark:text-[${color2}]` },
+              { label: "Movimientos", value: stats.totalMovimientos.toString(), color: `text-gray-600 dark:text-white` },
+              { label: "Recargas", value: stats.totalRecargas.toString(), color: `text-gray-600 dark:text-white` },
             ].map((stat) => (
               <div key={stat.label} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-400 dark:border-gray-700">
                 <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>

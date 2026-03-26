@@ -1,5 +1,5 @@
 // src/context/ThemeContext.jsx
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 const ThemeContext = createContext();
 
@@ -13,14 +13,30 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
   const [isDark, setIsDark] = useState(true);
-  const [autoMode, setAutoMode] = useState(true); // true = automático, false = manual
+  const [autoMode, setAutoMode] = useState(true);
   const [currentHour, setCurrentHour] = useState(new Date().getHours());
+  const manualTimeoutRef = useRef(null);
 
   // Función para determinar si debe ser dark según la hora
   const shouldBeDark = (hour) => {
-    // Dark mode de 6pm (18:00) a 8am (08:00)
-    // Light mode de 8am a 6pm
     return hour < 8 || hour >= 18;
+  };
+
+  // Reiniciar el modo automático después de un tiempo si está en manual
+  const resetToAutoMode = () => {
+    if (!autoMode) {
+      // Limpiar timeout anterior
+      if (manualTimeoutRef.current) {
+        clearTimeout(manualTimeoutRef.current);
+      }
+      
+      // Establecer nuevo timeout para volver a modo automático después de 5 minutos
+      manualTimeoutRef.current = setTimeout(() => {
+        setAutoMode(true);
+        setIsDark(shouldBeDark(new Date().getHours()));
+        manualTimeoutRef.current = null;
+      }, 5 * 60 * 1000); // 5 minutos
+    }
   };
 
   // Actualizar la hora cada minuto para cambios automáticos
@@ -31,7 +47,10 @@ export const ThemeProvider = ({ children }) => {
       
       if (autoMode) {
         const newIsDark = shouldBeDark(newHour);
-        setIsDark(newIsDark);
+        // Solo actualizar si cambió el estado para evitar re-renders innecesarios
+        if (newIsDark !== isDark) {
+          setIsDark(newIsDark);
+        }
       }
     };
     
@@ -41,16 +60,20 @@ export const ThemeProvider = ({ children }) => {
     // Actualizar cada minuto para detectar cambios de hora
     const interval = setInterval(updateHour, 60000);
     
-    return () => clearInterval(interval);
-  }, [autoMode]);
+    return () => {
+      clearInterval(interval);
+      if (manualTimeoutRef.current) {
+        clearTimeout(manualTimeoutRef.current);
+      }
+    };
+  }, [autoMode, isDark]);
 
   // Cargar preferencias guardadas al inicio
   useEffect(() => {
     const savedAutoMode = localStorage.getItem('themeAutoMode');
     const savedTheme = localStorage.getItem('theme');
-    const savedHour = localStorage.getItem('themeHour');
     
-    // Verificar si hay una preferencia guardada para el modo automático
+    // Si hay preferencia guardada de modo automático, usarla
     if (savedAutoMode !== null) {
       setAutoMode(savedAutoMode === 'true');
     }
@@ -61,8 +84,7 @@ export const ThemeProvider = ({ children }) => {
     } 
     // Si estamos en modo automático o no hay preferencias guardadas
     else {
-      const hour = savedHour ? parseInt(savedHour) : new Date().getHours();
-      setCurrentHour(hour);
+      const hour = new Date().getHours();
       setIsDark(shouldBeDark(hour));
     }
   }, []);
@@ -71,7 +93,6 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('themeAutoMode', autoMode);
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    localStorage.setItem('themeHour', currentHour.toString());
     
     // Aplicar clase al html
     if (isDark) {
@@ -79,22 +100,28 @@ export const ThemeProvider = ({ children }) => {
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [isDark, autoMode, currentHour]);
+  }, [isDark, autoMode]);
 
   // Función para cambiar el tema manualmente
   const toggleTheme = () => {
+    // Si estaba en automático, cambiar a modo manual temporal
     if (autoMode) {
-      // Si estaba en automático, al cambiar manualmente se desactiva el modo automático
       setAutoMode(false);
     }
     setIsDark(prev => !prev);
+    // Programar vuelta al modo automático después de 5 minutos
+    resetToAutoMode();
   };
 
-  // Función para activar/desactivar el modo automático
+  // Función para activar/desactivar el modo automático (mantenida para compatibilidad)
   const setAutoTheme = (enabled) => {
     setAutoMode(enabled);
     if (enabled) {
       // Al activar automático, aplicar el tema según la hora actual
+      if (manualTimeoutRef.current) {
+        clearTimeout(manualTimeoutRef.current);
+        manualTimeoutRef.current = null;
+      }
       setIsDark(shouldBeDark(currentHour));
     }
   };
