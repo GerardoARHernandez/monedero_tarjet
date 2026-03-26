@@ -1,11 +1,10 @@
 // src/views/ClientHome.jsx
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import ClientHeader from "../components/ClientHeader";
 import ClientFooter from "../components/ClientFooter";
 import QRModal from "../components/QRModal"; 
 import { useTheme } from "../context/ThemeContext"; 
-import { Link } from "react-router-dom";
 
 const ClientHome = () => {
   const navigate = useNavigate();
@@ -13,6 +12,7 @@ const ClientHome = () => {
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
+  const [business, setBusiness] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState("");
 
@@ -26,8 +26,35 @@ const ClientHome = () => {
     
     const user = JSON.parse(storedUser);
     setUserData(user);
+    
+    // Cargar información del negocio
+    const negocioId = user.negocioId || 1;
+    fetchBusiness(negocioId);
     fetchUserBalance(user.usuarioId);
   }, [navigate]);
+
+  const fetchBusiness = async (negocioId) => {
+    try {
+      const response = await fetch(`https://souvenir-site.com/TarjetCashBack/api/negocios/${negocioId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setBusiness(data.data);
+        // Guardar en localStorage para persistencia
+        localStorage.setItem("business", JSON.stringify(data.data));
+      } else {
+        console.error("Error al cargar negocio:", data.message);
+      }
+    } catch (error) {
+      console.error("Error al cargar negocio:", error);
+    }
+  };
 
   const fetchUserBalance = async (usuarioId) => {
     setLoading(true);
@@ -154,6 +181,11 @@ const ClientHome = () => {
 
   const stats = calculateStats();
   const esTitular = userData?.titular === 1;
+  
+  // Colores del negocio
+  const color1 = business?.negocioColor1 || "#4f46e5"; // indigo-600 como fallback
+  const color2 = business?.negocioColor2 || "#7c3aed"; // indigo-500 como fallback
+  const imagenUrl = business?.negocioImagenUrl;
 
   if (loading) {
     return (
@@ -189,17 +221,17 @@ const ClientHome = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-      <ClientHeader esTitular={esTitular} />
+      <ClientHeader esTitular={esTitular} color1={color1} color2={color2} />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-8 space-y-6">
         {/* Balance card */}
         <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-          {/* Imagen */}
+          {/* Imagen - Usar imagen del negocio si existe */}
           <div className="md:w-1/2 order-1 md:order-1">
             <div className="relative rounded-2xl overflow-hidden shadow-lg h-full">
               <img 
-                src="/1.jpeg" 
-                alt="Wallet illustration" 
+                src={imagenUrl && imagenUrl !== "" ? imagenUrl : "/1.jpeg"} 
+                alt={business?.negocioNombre || "Wallet illustration"} 
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
               />              
             </div>
@@ -207,13 +239,18 @@ const ClientHome = () => {
 
           {/* Saldo y acciones QR */}
           <div className="md:w-1/2 order-2 md:order-2 space-y-4">
-            {/* Tarjeta de saldo */}
-            <div className="bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
+            {/* Tarjeta de saldo - Usar colores del negocio */}
+            <div 
+              className="rounded-2xl p-6 text-white shadow-lg"
+              style={{ 
+                background: `linear-gradient(135deg, ${color1}, ${color2})` 
+              }}
+            >
               <div>
                 <div className="bottom-4 left-4 text-white">
                   <p className="text-sm font-medium opacity-90">Bienvenido a <strong>tu monedero digital</strong></p>                
                 </div>
-                <p className="text-sm text-indigo-200 font-medium flex items-center gap-2 pt-2">
+                <p className="text-sm font-medium flex items-center gap-2 pt-2" style={{ color: `${color1}20` }}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -224,19 +261,19 @@ const ClientHome = () => {
                 </p>
               </div>
               
-              <div className="mt-4 pt-4 border-t border-indigo-400/30">
+              <div className="mt-4 pt-4 border-t" style={{ borderColor: `${color1}40` }}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-indigo-200">
+                    <p className="text-sm" style={{ color: `${color1}20` }}>
                       {userData?.usuarioNombre} {userData?.usuarioApellido}
                     </p>
-                    <p className="text-xs text-indigo-200 flex items-center gap-1 mt-1">
+                    <p className="text-xs flex items-center gap-1 mt-1" style={{ color: `${color1}20` }}>
                       {userData?.titular === 1 ? "Cuenta Titular" : "Cuenta Adicional"}
                       {userData?.idTitular > 0 && ` · ID Titular: ${userData.idTitular}`}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-indigo-200">Saldo utilizado</p>
+                    <p className="text-xs" style={{ color: `${color1}20` }}>Saldo utilizado</p>
                     <p className="text-sm font-semibold">
                       ${userData?.montoUtilizado?.toFixed(2) || "0.00"}
                     </p>
@@ -245,10 +282,14 @@ const ClientHome = () => {
               </div>
             </div>
 
-            {/* Botón de QR */}
+            {/* Botón de QR - Usar colores del negocio */}
             <button
               onClick={() => setIsQRModalOpen(true)}
-              className="w-full flex items-center justify-center gap-2 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-indigo-600 dark:text-indigo-400 font-semibold py-4 px-4 rounded-xl border-2 border-indigo-600 dark:border-indigo-400 transition-all duration-300 transform hover:scale-105"
+              className="w-full flex items-center justify-center gap-2 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 font-semibold py-4 px-4 rounded-xl border-2 transition-all duration-300 transform hover:scale-105"
+              style={{ 
+                color: color1,
+                borderColor: color1
+              }}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
@@ -264,8 +305,8 @@ const ClientHome = () => {
             {[
               { label: "Ingresos del mes", value: `$${stats.ingresosMes.toFixed(2)}`, color: "text-green-600 dark:text-green-400" },
               { label: "Gastos del mes", value: `$${stats.gastosMes.toFixed(2)}`, color: "text-red-500 dark:text-red-400" },
-              { label: "Movimientos", value: stats.totalMovimientos.toString(), color: "text-indigo-600 dark:text-indigo-400" },
-              { label: "Recargas", value: stats.totalRecargas.toString(), color: "text-indigo-600 dark:text-indigo-400" },
+              { label: "Movimientos", value: stats.totalMovimientos.toString(), color: `text-[${color1}] dark:text-[${color2}]` },
+              { label: "Recargas", value: stats.totalRecargas.toString(), color: `text-[${color1}] dark:text-[${color2}]` },
             ].map((stat) => (
               <div key={stat.label} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-400 dark:border-gray-700">
                 <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
@@ -280,7 +321,11 @@ const ClientHome = () => {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-400 dark:border-gray-700">
             <div className="px-6 py-4 border-b border-gray-400 dark:border-gray-700 flex items-center justify-between">
               <h2 className="font-semibold text-gray-800 dark:text-white">Movimientos recientes</h2>
-              <Link to="/client/historial" className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+              <Link 
+                to="/client/historial" 
+                className="text-sm hover:underline"
+                style={{ color: color1 }}
+              >
                 Ver todos
               </Link>
             </div>
@@ -352,7 +397,11 @@ const ClientHome = () => {
             )}
             {transactions.length > 5 && (
               <div className="px-6 py-3 border-t border-gray-400 dark:border-gray-700 text-center">
-                <Link to="/client/historial" className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+                <Link 
+                  to="/client/historial" 
+                  className="text-sm hover:underline"
+                  style={{ color: color1 }}
+                >
                   Ver los {transactions.length - 5} movimientos restantes
                 </Link>
               </div>
