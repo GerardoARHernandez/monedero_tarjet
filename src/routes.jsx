@@ -6,6 +6,7 @@ import RegisterFromAdmin from "./views/admin/RegisterFromAdmin";
 import Abonar from "./views/admin/Abonar";
 import Canjear from "./views/admin/Canjear";
 import Historial from "./views/Historial";
+import TerminosCondiciones from "./views/TerminosCondiciones";
 
 const AppRoutes = () => {
   return (
@@ -14,6 +15,7 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/client" element={<ClientHome />} />
       <Route path="/client/historial" element={<Historial />} />
+      <Route path="/client/terminos" element={<TerminosCondiciones />} />
       <Route path="/admin" element={<AdminHome />} />
       <Route path="/admin/registrar" element={<RegisterFromAdmin />} />
       <Route path="/admin/canjear" element={<Canjear />} />

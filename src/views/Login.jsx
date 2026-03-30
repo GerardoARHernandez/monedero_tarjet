@@ -25,6 +25,20 @@ const Login = () => {
     
     // Verificar si es el admin (número especial, cualquier contraseña funciona)
     if (cleanPhone === ADMIN_PHONE) {
+      // *** IMPORTANTE: Guardar información del admin en localStorage ***
+      const adminData = {
+        usuarioId: 1, // Puedes poner un ID fijo o el que corresponda
+        usuarioNombre: "Admin",
+        usuarioApellido: "Sistema",
+        usuarioTelefono: cleanPhone,
+        usuarioRol: "ADMIN",
+        tipoUsuario: "ADMIN",
+        titular: 1,
+        idTitular: 1,
+        negocioId: 1 // Ajusta según tu negocio
+      };
+      
+      localStorage.setItem("user", JSON.stringify(adminData));
       navigate("/admin");
       setLoading(false);
       return;
